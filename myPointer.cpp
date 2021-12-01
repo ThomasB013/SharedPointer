@@ -160,9 +160,16 @@ Ptr::myPointer Ptr::myPointer::begin() const {
 	return TEMP;
 }
 
-
 Ptr::myPointer Ptr::myPointer::end() const {
 	myPointer TEMP = *this;
 	TEMP.cur = TEMP.base + TEMP.size;
+	return TEMP;
+}
+
+Ptr::myPointer Ptr::myPointer::deep_copy() const {
+	myPointer TEMP = Ptr::myPointer::alloc(size);
+	for (auto val : *this)
+		*TEMP++ = val;
+	TEMP.cur = TEMP.base + (cur - base);
 	return TEMP;
 }

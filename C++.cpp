@@ -16,7 +16,10 @@ int main() {
 		}
 		myPointer p2 = p;
 		myPointer p3 = move(p2);
-		for (auto x : p3)
+		p3 -= 3;
+		myPointer p4 = p3.deep_copy();
+		cout << *p4 << ": ";
+		for (auto x : p4)
 			cout << x;
 		cout << '\n';
 	}

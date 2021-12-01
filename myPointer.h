@@ -45,6 +45,8 @@ namespace Ptr {
 
 		myPointer begin() const;
 		myPointer end() const;
+
+		myPointer deep_copy() const;
 	};
 }
 
