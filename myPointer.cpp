@@ -2,13 +2,14 @@
 #include <iostream>
 #include <map>
 #include <string>
-using namespace std;
+
+using namespace Ptr;
 
 namespace {
-	map<int*, unsigned> ref_count = {};
+	std::map<int*, unsigned> ref_count = {};
 }
 
-Ptr::myPointer::~myPointer() {
+myPointer::~myPointer() {
 	/* Destructor deallocates memory if the count is zero.
 	   If the count is zero, delete the referenced content.
 	   If the to is the nullptr, ignore. 
@@ -22,19 +23,19 @@ Ptr::myPointer::~myPointer() {
 	}
 }
 
-Ptr::myPointer::myPointer() {
+myPointer::myPointer() {
 	cur = base = nullptr;
 	size = 0;
 }
 
-Ptr::myPointer::myPointer(const Ptr::myPointer& ptr) {
+myPointer::myPointer(const myPointer& ptr) {
 	base = ptr.base;
 	cur = ptr.cur;
 	size = ptr.size;
 	ref_count[base]++;
 }
 
-Ptr::myPointer::myPointer(myPointer&& ptr) noexcept {
+myPointer::myPointer(myPointer&& ptr) noexcept {
 	base = ptr.base;
 	cur = ptr.cur;
 	size = ptr.size;
@@ -42,7 +43,7 @@ Ptr::myPointer::myPointer(myPointer&& ptr) noexcept {
 	ptr.cur = ptr.base = nullptr;
 }
 
-Ptr::myPointer& Ptr::myPointer::operator=(const Ptr::myPointer& ptr) {
+myPointer& myPointer::operator=(const myPointer& ptr) {
 	this->~myPointer(); //Destroy current pointer.
 	base = ptr.base;
 	cur = ptr.cur;
@@ -51,7 +52,7 @@ Ptr::myPointer& Ptr::myPointer::operator=(const Ptr::myPointer& ptr) {
 	return *this;
 }
 
-Ptr::myPointer& Ptr::myPointer::operator=(Ptr::myPointer&& ptr) noexcept {
+myPointer& myPointer::operator=(myPointer&& ptr) noexcept {
 	this->~myPointer();
 	base = ptr.base;
 	cur = ptr.cur;
@@ -61,8 +62,8 @@ Ptr::myPointer& Ptr::myPointer::operator=(Ptr::myPointer&& ptr) noexcept {
 	return *this;
 }
 
-Ptr::myPointer Ptr::myPointer::alloc(size_t n) throw(bad_alloc) {
-	Ptr::myPointer p;
+myPointer myPointer::alloc(size_t n) throw(std::bad_alloc) {
+	myPointer p;
 	p.base = new int[n]; //throws bad_alloc
 	p.cur = p.base;
 	p.size = n;
@@ -70,104 +71,112 @@ Ptr::myPointer Ptr::myPointer::alloc(size_t n) throw(bad_alloc) {
 	return p;
 }
 
-int& Ptr::myPointer::operator[](size_t i) throw(out_of_range) {
+myPointer::value_type& myPointer::operator[](size_t i) throw(std::out_of_range) {
 	if (cur >= base && i + (cur - base) < size)
 		return cur[i];
-	throw out_of_range{ "Ptr::myPointer::operator[](size_t " + to_string(i) + ") out of range for size " + to_string(size) };
+	throw std::out_of_range{ "Ptr::myPointer::operator[](size_t " + std::to_string(i) + ") out of range for size " + std::to_string(size) };
 }
 
-const int& Ptr::myPointer::operator[](size_t i) const throw(out_of_range) {
+const myPointer::value_type& myPointer::operator[](size_t i) const throw(std::out_of_range) {
 	if (cur >= base && i + (cur - base) < size)
 		return cur[i];
-	throw out_of_range{ "Ptr::myPointer::operator[](size_t " + to_string(i) + ") const out of range for size " + to_string(size) };
+	throw std::out_of_range{ "Ptr::myPointer::operator[](size_t " + std::to_string(i) + ") const out of range for size " + std::to_string(size) };
 }
 
-int& Ptr::myPointer::operator*() throw(out_of_range)  {
+myPointer::value_type & myPointer::operator*() throw(std::out_of_range) {
 	if (cur >= base && cur - base < size)
 		return *cur;
-	throw out_of_range("Ptr::myPointer::operator*() out of range");
+	throw std::out_of_range("Ptr::myPointer::operator*() out of range");
 }
 
-const int& Ptr::myPointer::operator*() const throw(out_of_range) {
+const myPointer::value_type& myPointer::operator*() const throw(std::out_of_range) {
 	if (cur >= base && cur - base < size)
 		return *cur;
-	throw out_of_range("Ptr::myPointer::operator*() const out of range");
+	throw std::out_of_range("Ptr::myPointer::operator*() const out of range");
 }
 
-Ptr::myPointer& Ptr::myPointer::operator++() {
+myPointer& myPointer::operator++() {
 	cur++;
 	return *this;
 }
 
-Ptr::myPointer& Ptr::myPointer::operator--() {
+myPointer& myPointer::operator--() {
 	cur--;
 	return *this;
 }
 
-Ptr::myPointer Ptr::myPointer::operator++(int) {
+myPointer myPointer::operator++(int) {
 	const myPointer TEMP = *this;
 	cur++;
 	return TEMP;
 }
 
-Ptr::myPointer Ptr::myPointer::operator--(int) {
+myPointer myPointer::operator--(int) {
 	const myPointer TEMP = *this;
 	cur--;
 	return TEMP;
 }
 
-Ptr::myPointer& Ptr::myPointer::operator+=(size_t n) {
+myPointer& myPointer::operator+=(size_t n) {
 	cur += n;
 	return *this;
 }
 
-Ptr::myPointer& Ptr::myPointer::operator-=(size_t n) {
+myPointer&  myPointer::operator-=(size_t n) {
 	cur -= n;
 	return *this;
 }
 
-int Ptr::myPointer::operator-(const Ptr::myPointer& ptr) const {
+myPointer::difference_type myPointer::operator-(const myPointer& ptr) const {
 	return cur - ptr.cur;
 }
 
-bool Ptr::myPointer::operator==(const Ptr::myPointer& ptr) const {
+bool myPointer::operator==(const myPointer& ptr) const {
 	return (cur == ptr.cur);
 }
 
-bool Ptr::myPointer::operator!=(const Ptr::myPointer& ptr) const {
+bool myPointer::operator!=(const myPointer& ptr) const {
 	return (cur != ptr.cur);
 }
 
-bool Ptr::myPointer::operator<(const Ptr::myPointer& ptr) const {
+bool myPointer::operator<(const myPointer& ptr) const {
 	return (cur < ptr.cur);
 }
 
-bool Ptr::myPointer::operator>(const Ptr::myPointer& ptr) const {
+bool myPointer::operator>(const myPointer& ptr) const {
 	return (cur > ptr.cur);
 }
 
-bool Ptr::myPointer::operator<=(const Ptr::myPointer& ptr) const {
+bool myPointer::operator<=(const myPointer& ptr) const {
 	return (cur <= ptr.cur);
 }
 
-bool Ptr::myPointer::operator>=(const Ptr::myPointer& ptr) const {
+bool myPointer::operator>=(const myPointer& ptr) const {
 	return (cur >= ptr.cur);
 }
 
-Ptr::myPointer Ptr::myPointer::begin() const {
+myPointer myPointer::begin() const {
 	myPointer TEMP = *this;
 	TEMP.cur = TEMP.base;
 	return TEMP;
 }
 
-Ptr::myPointer Ptr::myPointer::end() const {
+myPointer myPointer::end() const {
 	myPointer TEMP = *this;
 	TEMP.cur = TEMP.base + TEMP.size;
 	return TEMP;
 }
 
-Ptr::myPointer Ptr::myPointer::deep_copy() const {
-	myPointer TEMP = Ptr::myPointer::alloc(size);
+myPointer::size_type myPointer::get_size() const {
+	return size;
+}
+
+myPointer::size_type myPointer::get_dif_end() const {
+	return size - (base - cur);
+}
+
+myPointer myPointer::deep_copy() const {
+	myPointer TEMP = myPointer::alloc(size);
 	for (auto val : *this)
 		*TEMP++ = val;
 	TEMP.cur = TEMP.base + (cur - base);
